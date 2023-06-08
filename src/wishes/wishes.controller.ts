@@ -8,6 +8,7 @@ import {
   Delete,
   Req,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
@@ -28,28 +29,51 @@ export class WishesController {
     return this.wishesService.findAll();
   }
 
+  @Get('last')
+  getLastOne() {
+    return this.wishesService.findLastOne();
+  }
+
+  @Get('top')
+  getTopOne() {
+    return this.wishesService.findTopOne();
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateWishDto: UpdateWishDto,
+    @Req() req,
+  ) {
+    this.wishesService.update(+id, updateWishDto, req.user);
+    return this.wishesService.findOne(+id);
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.wishesService.findOne(+id);
   }
 
-  @Get('last')
-  getLastOne() {
-    return this.wishesService.findLastOne();
-  }
-
   @UseGuards(JwtGuard)
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWishDto: UpdateWishDto) {
-    this.wishesService.update(+id, updateWishDto);
-    return this.wishesService.findOne(+id);
+  @Post(':id/copy')
+  async copy(@Req() req, @Param('id') id: string) {
+    const wish = await this.wishesService.findOne(+id);
+
+    if (!wish) {
+      throw new NotFoundException('Подарок не найден');
+    }
+
+    const copiedWish = await this.wishesService.copy(wish, req.user);
+
+    return this.wishesService.create(copiedWish, req.user);
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    this.wishesService.remove(+id);
+  remove(@Param('id') id: string, @Req() req) {
+    this.wishesService.remove(+id, req.user);
     return this.wishesService.findOne(+id);
   }
 }

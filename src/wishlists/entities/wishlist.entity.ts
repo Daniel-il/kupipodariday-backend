@@ -8,6 +8,8 @@ import {
   JoinTable,
   ManyToOne,
   Entity,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -16,9 +18,11 @@ export class Wishlist {
   id: number;
 
   @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
   @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column()

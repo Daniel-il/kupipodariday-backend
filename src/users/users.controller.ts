@@ -14,11 +14,15 @@ import {
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtGuard } from 'src/guards/jwt.guard';
+import { WishesService } from 'src/wishes/wishes.service';
 
 @UseGuards(JwtGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly wishService: WishesService,
+  ) {}
 
   @Get()
   findAll() {
@@ -33,7 +37,16 @@ export class UsersController {
     return result;
   }
   @Get('/me/wishes')
-  getCurrentUserWishes() {}
+  getCurrentUserWishes(@Req() req) {
+    return this.wishService.findUserWishes(req.user);
+  }
+
+  @Get(':username/wishes')
+  async getUserWishes(@Param('username') username: string) {
+    const user = await this.usersService.findByUsername(username);
+    return await this.wishService.findUserWishes(user);
+  }
+
   @Get(':username')
   async findOneByUsername(@Param('username') username: string) {
     const user = await this.usersService.findByUsername(username);

@@ -4,6 +4,6 @@ import { IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateWishDto extends PartialType(CreateWishDto) {
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   raised: number;
 }
