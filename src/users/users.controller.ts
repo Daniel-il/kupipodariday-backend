@@ -67,7 +67,7 @@ export class UsersController {
 
   @Patch('me')
   async updateCurrentUser(@Req() req, @Body() updateUserDto: UpdateUserDto) {
-    this.usersService.update(req.user.id, updateUserDto);
+    await this.usersService.update(req.user.id, updateUserDto);
 
     const user = await this.usersService.findOne(req.user.id);
     const { password, ...result } = user;
